@@ -1,0 +1,127 @@
+* Introduction
+
+This directory contains tools to collect benign traffic and process it
+for use as training data by the Automatic Signature Generation system.
+
+* Design Overview
+
+#+BEGIN_SRC ditaa :file README_overview.png :cmdline -E -s 6.46
+live traffic stream or recorded archive
+                   |
+          +--------+--------+
+          |                 |
+          v                 v
+   /-------------\   /--------------\
+   |   Traffic   |   | Traffic Rate |
+   | Capture and |   |   Analysis   |
+   |   Sorting   |   \--------------/
+   \------+------/
+          |
+          v
+   /--------------\
+   | Bloom Filter |
+   |  Extraction  |
+   \------+-------/
+          |
+          v
+   +--------------+
+   |{s}           |
+   | Bloom Filter |
+   |   Database   |
+   +--------------+
+#+END_SRC
+#+CAPTION: Benign traffic Bloom filter extraction for training stage
+#+LABEL: fig:overview
+#+ATTR_LATEX: :width "" :options scale=0.0969
+#+RESULTS:
+[[file:README_overview.png]]
+
+Training data collection is depicted in Figure [[fig:overview]].  The
+general steps in collecting training data are:
+
+  1. /Traffic rate analysis:/ The sizing of the Bloom filters depends
+     on the amount of traffic that needs to be stored in the Bloom
+     filter for a particular port on the network under consideration.
+     To size efficiently, initial data on the packet rate for a given
+     port must be collected.
+
+  2. /Traffic capture and sorting:/ This step involves capturing
+     packets on the wire and sorting them by service and port into
+     separate pcap files.  The tools that perform this task must
+     collect for each port and service based on time and/or number of
+     packets.  Information from traffic analysis rates is helpful.
+
+  3. /Bloom filter extraction from captured traffic:/ In this stage,
+     for each service and port, a Bloom filter is produced that
+     contains n-grams from the captured traffic.  This step may
+     sometimes involve combining Bloom filters from multiple runs for
+     the same service and port.
+
+  4. /Storage of Bloom filters:/ Ultimately, the Bloom filters
+     produced in (3) need to be stored in a format that makes them
+     easily accessible for signature production.
+
+* Benign Traffic Collection Tool
+
+The traffic collection tool can be run in two modes:
+  1. Traffic rate analysis mode
+  2. Traffic collection mode
+
+The traffic rate analysis mode is designed primarily to produce
+initial reconnaissance data on a network.  In this mode, packet
+content is not stored.  Statistics from sniffed data on the following
+items is collected:
+  * Bytes of payload per service and port per unit time
+  * Packets per service and port per unit time
+
+The motivation for traffic rate analysis is as follows.  The false
+alarm rate of the produced signatures is dependent on the amount of
+traffic seen at training time for a particular service and port.  The
+mean time between false alarms is proportional to the time over which
+benign traffic for that port was collected.  Since that traffic will
+be stored in a Bloom filter, the Bloom filter must be sized
+appropriately.  Sizing is based on data rate for service and port as
+well as collection time.  In addition, when running in traffic
+collection mode, the traffic collector runs until all traffic amount
+requirements for all service and port combinations are satisfied.  The
+data rate output can be used as a requirement for the collection mode.
+
+The traffic rate analysis mode should be able either to collect rates
+for all observed packets going to well-known ports or only for ports
+specified as an input.
+
+In traffic collection mode, the tool collects all traffic specified in
+a master collection configuration file.  The file specifies for each
+port/service pair, minimum collection number of bytes and maximum
+collection number of bytes.  From either command line or the master
+collection file, the interface to sniff can be specified.  In
+addition, a traffic rate analysis output file can be used to derive a
+master collection file.  In that case, the user specifies either on
+the command line or as part of the master collection file which
+traffic rate analysis output file to use and how many hours for which
+it should be scaled.  Thus, if the traffic rate analysis output file
+corresponded to one hour of data and we desire traffic collection for
+12 hours, the traffic collected for each port will be scaled up by a
+factor of 12.
+
+The output of the traffic collection mode is a set of pcap files
+sorted by service and port as well as a master index file, all stored
+in a directory specified either on the command line or in the master
+collection configuration file.
+
+* emacs org-mode settings                                          :noexport:
+  :PROPERTIES:
+  :VISIBILITY: folded
+  :END:
+#+STARTUP: showall
+#+OPTIONS: toc:nil ^:{} H:10
+one inch margins on letter paper:
+#+LATEX_HEADER: \usepackage[letterpaper,margin=1in,twoside]{geometry}%
+get rid of the ugly red borders around clickable links:
+#+LATEX_HEADER: \hypersetup{pdfborder={0 0 0}}
+fix fonts
+#+LATEX_HEADER: \usepackage{lmodern}
+
+Local Variables:
+mode:org
+End:

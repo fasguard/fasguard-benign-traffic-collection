@@ -63,9 +63,11 @@ general steps in collecting training data are:
 
 * Benign Traffic Collection Tool
 
-The traffic collection tool can be run in two modes:
-  1. Traffic rate analysis mode
-  2. Traffic collection mode
+The traffic collection tool can be run in two modes: traffic rate
+analysis mode and traffic collection mode.  Each of these modes is
+described in more detail below.
+
+** Traffic Rate Analysis Mode
 
 The traffic rate analysis mode is designed primarily to produce
 initial reconnaissance data on a network.  In this mode, packet
@@ -89,6 +91,8 @@ data rate output can be used as a requirement for the collection mode.
 The traffic rate analysis mode should be able either to collect rates
 for all observed packets going to well-known ports or only for ports
 specified as an input.
+
+** Traffic Collection Mode
 
 In traffic collection mode, the tool collects all traffic specified in
 a master collection configuration file.  The file specifies for each

@@ -3,7 +3,9 @@
 This directory contains tools to collect benign traffic and process it
 for use as training data by the Automatic Signature Generation system.
 
-* Design Overview
+* Design
+
+** Overview
 
 #+BEGIN_SRC ditaa :file README_overview.png :cmdline -E -s 6.46
 live traffic stream or recorded archive
@@ -61,13 +63,13 @@ general steps in collecting training data are:
      produced in (3) need to be stored in a format that makes them
      easily accessible for signature production.
 
-* Benign Traffic Collection Tool
+** Benign Traffic Collection Tool
 
 The traffic collection tool can be run in two modes: traffic rate
 analysis mode and traffic collection mode.  Each of these modes is
 described in more detail below.
 
-** Traffic Rate Analysis Mode
+*** Traffic Rate Analysis Mode
 
 The traffic rate analysis mode is designed primarily to produce
 initial reconnaissance data on a network.  In this mode, packet
@@ -92,7 +94,7 @@ The traffic rate analysis mode should be able either to collect rates
 for all observed packets going to well-known ports or only for ports
 specified as an input.
 
-** Traffic Collection Mode
+*** Traffic Collection Mode
 
 In traffic collection mode, the tool collects all traffic specified in
 a master collection configuration file.  The file specifies for each

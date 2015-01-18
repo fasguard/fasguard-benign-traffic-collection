@@ -17,4 +17,16 @@ def main(raw_args=sys.argv):
 
     logging_config(log, args.verbose)
 
+    if args.self_test:
+        return self_test()
+
     raise NotImplementedError()
+
+def self_test():
+    import unittest
+    tests_dir = __name__
+    loader = unittest.TestLoader()
+    tests = loader.discover(tests_dir, pattern='*.py')
+    runner = unittest.TextTestRunner()
+    results = runner.run(tests)
+    return 0 if results.wasSuccessful() else 1

@@ -12,6 +12,9 @@ def parse_args(raw_args=sys.argv):
         description='Capture packets and save to a pcap file for future\
  use in a FASGuard bloom filter.',
     )
+    parser.add_argument('--self-test',
+                        action='store_true',
+                        help='run diagnostic self tests and exit')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='increase log message verbosity')
     parser.add_argument('-V', '--version', action='version', version='0.0')

@@ -70,3 +70,21 @@ def expectedFailure(note):
         test_item.__taptest_expected_failure_note__ = note
         return unittest.expectedFailure(test_item)
     return g
+
+@unittest.skip('skip example test cases')
+class Test(unittest.TestCase):
+    def test_example1_pass(self):
+        pass
+    def test_example2_fail(self):
+        self.fail('dummy fail')
+    def test_example3_err(self):
+        raise RuntimeError('dummy')
+    @unittest.skip('example skip')
+    def test_example4_skip(self):
+        pass
+    @expectedFailure('expected failure note')
+    def test_example5_expected_fail(self):
+        self.fail('dummy fail')
+    @expectedFailure('unexpected pass note')
+    def test_example6_unexpected_pass(self):
+        pass

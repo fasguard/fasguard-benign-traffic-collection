@@ -24,9 +24,10 @@ def main(raw_args=sys.argv):
 
 def self_test():
     import unittest
+    from .test import TAPTestRunner
     tests_dir = __name__
     loader = unittest.TestLoader()
     tests = loader.discover(tests_dir, pattern='*.py')
-    runner = unittest.TextTestRunner()
+    runner = TAPTestRunner()
     results = runner.run(tests)
     return 0 if results.wasSuccessful() else 1

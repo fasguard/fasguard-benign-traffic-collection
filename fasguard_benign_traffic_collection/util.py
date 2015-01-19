@@ -17,6 +17,11 @@ def dummy_context_manager(obj):
     """
     yield obj
 
+@contextlib.contextmanager
+def close_when_done(obj):
+    yield obj
+    obj.close()
+
 def ensure_tuple(obj):
     if iterable_not_string(obj):
         return tuple(obj)

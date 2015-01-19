@@ -5,7 +5,7 @@ from __future__ import absolute_import
 # relative imports must go first; see
 # http://stackoverflow.com/q/28006766
 from .args import parse_args
-from .config import parse_config
+from .config import parse_config, process_config
 from .logging import config as logging_config
 
 import logging
@@ -22,6 +22,7 @@ def main(raw_args=sys.argv):
         return self_test()
 
     raw_config = parse_config(args.config)
+    config = process_config(raw_config)
 
     raise NotImplementedError()
 

@@ -22,3 +22,39 @@ def parse_config(config_filename):
         if not config_text:
             return None
         return ast.literal_eval(config_text)
+
+def process_config(raw_config):
+    """process the raw literal from the config file into a config dict
+
+    raw_config is the dict returned from parse_config().  It maps
+    strings to objects.  For each key 'foo' with val 'obj', this calls
+    config_handle_foo(obj), which is expected to return a value that
+    will be associated with 'foo' in the returned config dict.
+    """
+    config = {}
+    if raw_config is None:
+        raw_config = {}
+    for keyword, obj in raw_config.iteritems():
+        try:
+            handler = config_handlers[keyword]
+        except KeyError:
+            log.warning('unknown keyword in config: %s', keyword)
+            continue
+        val = handler(obj)
+        config[keyword] = val
+    return config
+
+config_handlers = {}
+def config_handler(keyword=None):
+    """decorator to register a function to handle a chunk of raw config data
+    """
+    def g(f):
+        kw = keyword
+        if kw is None:
+            pfx = 'config_handle_'
+            if not f.__name__.startswith(pfx):
+                raise ValueError('missing keyword')
+            kw = f.__name__[len(pfx):]
+        config_handlers[kw] = f
+        return f
+    return g

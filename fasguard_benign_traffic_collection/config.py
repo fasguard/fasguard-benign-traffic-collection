@@ -58,3 +58,18 @@ def config_handler(keyword=None):
         config_handlers[kw] = f
         return f
     return g
+
+@config_handler()
+def config_handle_interfaces(raw):
+    """construct the set of interfaces and/or filenames to read from
+
+    The 'interfaces' keyword is mapped to an iterable of strings where
+    each string names either an interface or a pcap filename.  For
+    each named interface and file, a separate capture thread will be
+    created to read packets from that interface or file.
+
+    If the 'interface' keyword is not specified in the config then
+    this function won't be called and packets will be read from a
+    default interface.
+    """
+    return set(raw)

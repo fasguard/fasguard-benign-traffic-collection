@@ -9,7 +9,9 @@ from .capture import CaptureParams, CaptureThread, CaptureThreadError
 from .config import parse_config, process_config
 from .dumpfiles import Dumpfiles
 from .logging import config as logging_config
+from .stats import Stats
 
+import datetime
 import logging
 try:
     import queue
@@ -44,6 +46,7 @@ def run(config):
     # queue (which might be an exception) to let the main thread know
     # that it is done
     status_q = queue.Queue()
+    stats = Stats()
 
     # linktype must match among all pcap instances.  Packets from
     # multiple packet capture threads might go to the same dumpfile,
@@ -57,7 +60,8 @@ def run(config):
         snaplen = 65535,
     )
 
-    with Dumpfiles(config, capture_params) as dumpfiles:
+    with Dumpfiles(config, capture_params, stats) as dumpfiles:
+        start = datetime.datetime.utcnow()
         try:
             for iface in config.get('interfaces', (None,)):
                 log.info('reading packets from %s',
@@ -106,8 +110,16 @@ def run(config):
                 log.info('shutting down')
                 shutdown_event.set()
         finally:
-            # \todo stats
-            pass
+            stop = datetime.datetime.utcnow()
+            elapsed = (stop - start).total_seconds()
+            if elapsed == 0.0:
+                elapsed = datetime.datetime.resolution.total_seconds()
+            packets = stats.packets
+            bytes = stats.bytes
+            pps = packets / elapsed
+            Bps = bytes / elapsed
+            log.info('processed %i packets (%i bytes) in %f seconds' \
+                     + ' (%f pps, %f Bps)', packets, bytes, elapsed, pps, Bps)
 
 def self_test():
     import unittest

@@ -16,10 +16,11 @@ class Dumpfiles(KeyDefaultDict):
     If a service isn't in this (KeyError), the packet shouldn't be
     saved.
     """
-    def __init__(self, config, capture_params):
+    def __init__(self, config, capture_params, stats):
         super(Dumpfiles, self).__init__(self._factory)
         self._config = config
         self._capture_params = capture_params
+        self._stats = stats
         self._dumpfiles_by_filename = {}
     def __enter__(self):
         return self
@@ -58,20 +59,22 @@ class Dumpfiles(KeyDefaultDict):
         except KeyError:
             pass
 
-        dumpfile = Dumpfile(filename, self._capture_params)
+        dumpfile = Dumpfile(filename, self._capture_params,
+                            self._stats)
         self._dumpfiles_by_filename[filename] = dumpfile
         return dumpfile
 
 class Dumpfile(object):
     _pcap = None
     _dumper = None
-    def __init__(self, filename, capture_params):
+    def __init__(self, filename, capture_params, stats):
         linktype = capture_params.linktype
         assert linktype is not None
         assert capture_params.snaplen is not None
         self._pcap = pcap.pcap.open_dead(linktype, capture_params.snaplen)
         self._dumper = pcap.dumper(self._pcap, filename)
         self._lock = threading.RLock()
+        self._stats = stats
     def __enter__(self):
         return self
     def __exit__(self, exc_type, exc_value, tb):
@@ -85,5 +88,7 @@ class Dumpfile(object):
                 self._pcap.close()
                 self._pcap = None
     def save(self, packet, header):
+        # record the original packet length, not the capture length
+        self._stats.got_packet(header.len)
         with self._lock:
             self._dumper.dump(packet, header)

@@ -9,6 +9,7 @@ import collections
 import logging
 import socket
 import sys
+import unittest
 
 log = logging.getLogger(__name__)
 
@@ -405,3 +406,7 @@ def port_to_num(x, proto):
             raise ValueError('proto must be tcp or udp')
         proto = 'tcp' if proto == 6 else 'udp'
         return socket.getservbyname(x, proto)
+
+class Tests(unittest.TestCase):
+    # \todo write some tests
+    pass

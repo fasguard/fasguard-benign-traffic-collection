@@ -60,7 +60,7 @@ class Dumpfiles(KeyDefaultDict):
             pass
 
         dumpfile = Dumpfile(filename, self._capture_params,
-                            self._stats)
+                            self._stats.get_child(filename))
         self._dumpfiles_by_filename[filename] = dumpfile
         return dumpfile
 

@@ -112,14 +112,8 @@ def run(config):
         finally:
             stop = datetime.datetime.utcnow()
             elapsed = (stop - start).total_seconds()
-            if elapsed == 0.0:
-                elapsed = datetime.datetime.resolution.total_seconds()
-            packets = stats.packets
-            bytes = stats.bytes
-            pps = packets / elapsed
-            Bps = bytes / elapsed
-            log.info('processed %i packets (%i bytes) in %f seconds' \
-                     + ' (%f pps, %f Bps)', packets, bytes, elapsed, pps, Bps)
+            for line in stats.log_lines(elapsed):
+                log.info(line)
 
 def self_test():
     import unittest

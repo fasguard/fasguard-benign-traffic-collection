@@ -56,3 +56,18 @@ class Stats(object):
                 itertools.chain.from_iterable(
                     (self._children[n].log_lines(elapsed, prefix=(prefix+'  '))
                      for n in sorted(self._children))))
+
+class StatsLoggerThread(threading.Thread):
+
+    def __init__(self, stats, shutdown_event):
+        super(StatsLoggerThread, self).__init__(name='stats')
+        self._stats = stats
+        self._shutdown = shutdown_event
+
+    def run(self):
+        start = datetime.datetime.utcnow()
+        while not self._shutdown.is_set():
+            self._shutdown.wait(5.0)
+            elapsed = (datetime.datetime.utcnow() - start).total_seconds()
+            for line in self._stats.log_lines(elapsed):
+                log.info(line)

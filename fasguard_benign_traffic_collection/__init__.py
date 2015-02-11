@@ -9,9 +9,8 @@ from .capture import CaptureParams, CaptureThread, CaptureThreadError
 from .config import parse_config, process_config
 from .dumpfiles import Dumpfiles
 from .logging import config as logging_config
-from .stats import Stats
+from .stats import Stats, StatsLoggerThread
 
-import datetime
 import logging
 try:
     import queue
@@ -61,7 +60,8 @@ def run(config):
     )
 
     with Dumpfiles(config, capture_params, stats) as dumpfiles:
-        start = datetime.datetime.utcnow()
+        stats_thread = StatsLoggerThread(stats, shutdown_event)
+        stats_thread.start()
         try:
             for iface in config.get('interfaces', (None,)):
                 log.info('reading packets from %s',
@@ -110,10 +110,8 @@ def run(config):
                 log.info('shutting down')
                 shutdown_event.set()
         finally:
-            stop = datetime.datetime.utcnow()
-            elapsed = (stop - start).total_seconds()
-            for line in stats.log_lines(elapsed):
-                log.info(line)
+            log.debug('waiting for stats thread to exit')
+            stats_thread.join()
 
 def self_test():
     import unittest

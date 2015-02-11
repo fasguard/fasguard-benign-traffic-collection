@@ -22,6 +22,8 @@ class Dumpfiles(KeyDefaultDict):
         self._capture_params = capture_params
         self._stats = stats
         self._dumpfiles_by_filename = {}
+        self._discard_dumpfile = DiscardDumpfile(
+            self._stats.get_child('(discard)'))
     def __enter__(self):
         return self
     def __exit__(self, exc_type, exc_value, tb):
@@ -40,10 +42,14 @@ class Dumpfiles(KeyDefaultDict):
                 pattern = pattern[port]
         except KeyError:
             log.debug('no filename pattern in config for %s', service)
+            if self._discard_dumpfile is not None:
+                return self._discard_dumpfile
             raise
 
         if pattern is None:
             log.debug('filename pattern is None for %s', service)
+            if self._discard_dumpfile is not None:
+                return self._discard_dumpfile
             # pretend as if an entry wasn't found so that the packet
             # is dropped
             raise KeyError()
@@ -92,3 +98,9 @@ class Dumpfile(object):
         self._stats.got_packet(header.len)
         with self._lock:
             self._dumper.dump(packet, header)
+
+class DiscardDumpfile(object):
+    def __init__(self, stats):
+        self._stats = stats
+    def save(self, packet, header):
+        self._stats.got_packet(header.len)

@@ -240,13 +240,14 @@ class CaptureThread(threading.Thread):
                     # fragments.  fix in our dpkt and send a patch
                     # upstream
                     port = -1
-                t = ip.data
-                if not isinstance(t, dpkt.tcp.TCP) \
-                   and not isinstance(t, dpkt.udp.UDP):
-                    assert is_frag
-                    port = -1
                 else:
-                    port = t.sport if t.sport < t.dport else t.dport
+                    t = ip.data
+                    if not isinstance(t, dpkt.tcp.TCP) \
+                       and not isinstance(t, dpkt.udp.UDP):
+                        assert is_frag
+                        port = -1
+                    else:
+                        port = t.sport if t.sport < t.dport else t.dport
                 return (ethertype, proto, port)
             return (ethertype, proto)
         return (ethertype,)
